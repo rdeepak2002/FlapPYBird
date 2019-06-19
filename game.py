@@ -1,15 +1,13 @@
 import sys, pygame                                                      # imports
-pygame.init()                                                           # initialize pygame
 
 screenWidth  = 288                                                      # screen width variable
 screenHeight = 512                                                      # screen height variable
 
-screen = pygame.display.set_mode((screenWidth, screenHeight))           # set screen size
-bg_image = pygame.image.load("background-day.png")                      # background image
+screen = pygame.display.set_mode((screenWidth, screenHeight))         # set screen size
 
 world = {
     "score" : 0,
-    "time_elapsed_since_last_action" : 0
+    "background-image" : pygame.image.load("resources/background-day.png")
 }
 
 bird = {                                                                # bird object
@@ -22,8 +20,15 @@ bird = {                                                                # bird o
   "yVelocityMax" :   -9.0,
   "yAccel"       :   -1.0,
   "jumpSpeed"    :    8.0,
-  "image"        : pygame.image.load("yellowbird-midflap.png")
+  "image"        : pygame.image.load("resources/yellowbird-midflap.png")
 }
+
+def init():
+  gameIcon = pygame.image.load("resources/yellowbird-midflap.png")      # game icon
+  pygame.display.set_icon(gameIcon)
+  pygame.display.set_caption("Flappy Bird")
+
+  pygame.init()                                                         # initialize pygame
 
 def checkEvents():                                                      # method to check if mouse is clicked or game is closed    
     for event in pygame.event.get():
@@ -33,7 +38,7 @@ def checkEvents():                                                      # method
           bird["yVelocity"] = bird["jumpSpeed"]
 
 def updateSprites():                                                    # method to update images on screen
-    screen.blit(bg_image, (0, 0))                                       # draw background image
+    screen.blit(world["background-image"], (0, 0))                      # draw background image
     birdPos = bird["x"], bird["y"]                                      # get position of bird
     screen.blit(bird["image"], birdPos)                                 # draw bird 
     pygame.display.flip()                                               # update screen
@@ -58,5 +63,11 @@ def gameLoop():                                                         # game l
     mover()
     updateSprites()
 
-while True:                                                             # infinite loop
+def main():
+  init()
+
+  while True:
     gameLoop()
+
+if __name__ == "__main__":
+    main()
