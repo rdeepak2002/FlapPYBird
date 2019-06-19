@@ -7,7 +7,7 @@ screen = pygame.display.set_mode((screenWidth, screenHeight))                   
 
 world = {
   "score"            :   0,
-  "pipespace"        : 100,
+  "pipespace"        : 200,
   "pipes"            :  [],
   "background-image" : pygame.image.load("resources/background-day.png")
 }
@@ -29,9 +29,9 @@ def init():
   gameIcon = pygame.image.load("resources/yellowbird-midflap.png")              # game icon
   pygame.display.set_icon(gameIcon)
   pygame.display.set_caption("Flappy Bird")
-  world["pipes"] = [{"x": 200, "y" : 300}]
+  world["pipes"] = [{"x": 500, "y" : 300}]
   while len(world["pipes"]) < 8:
-    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(70, 350)})
+    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(80, 350)})
   pygame.init()                                                                 # initialize pygame
 
 def checkEvents():                                                              # method to check if mouse is clicked or game is closed    
@@ -44,6 +44,7 @@ def checkEvents():                                                              
 def updateSprites():                                                            # method to update images on screen
   baseImg = pygame.image.load("resources/base.png")
   pipeImg = pygame.image.load("resources/pipe-green.png")
+  pipeUpsidedownImg = pygame.transform.flip(pygame.image.load("resources/pipe-green.png"), False, True)
 
   screen.fill((0, 0, 0))
 
@@ -51,6 +52,7 @@ def updateSprites():                                                            
 
   for pipe in world["pipes"]:
     screen.blit(pipeImg, (pipe["x"]-bird["x"], pipe["y"]))
+    screen.blit(pipeUpsidedownImg, (pipe["x"]-bird["x"], pipe["y"]-100-320))
 
   screen.blit(baseImg, (0, 400))
   screen.blit(bird["image"], (127.0, bird["y"]  ))                              # draw bird 
@@ -83,7 +85,7 @@ def pipeMover():
     world["pipes"].pop(0)
 
   if(len(world["pipes"]) < 8):
-    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(70, 360)})
+    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(80, 360)})
 
 def gameLoop():                                                                  # game loop which contains logic of the game
   checkEvents()
