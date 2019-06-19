@@ -81,7 +81,7 @@ def playerMover():
   bird["x"] += 2
 
 def pipeMover():
-  if(world["pipes"][0]["x"]-bird["x"] < -30):                                     # remove pipe
+  if(world["pipes"][0]["x"]-bird["x"] < -80):                                     # remove pipe
     world["pipes"].pop(0)
 
   if(len(world["pipes"]) < 8):
