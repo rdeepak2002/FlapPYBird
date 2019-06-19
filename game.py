@@ -1,4 +1,4 @@
-import pygame                                                                   # imports
+import random, pygame                                                           # imports
 
 screenWidth  = 288                                                              # screen width variable
 screenHeight = 512                                                              # screen height variable
@@ -6,7 +6,9 @@ screenHeight = 512                                                              
 screen = pygame.display.set_mode((screenWidth, screenHeight))                   # set screen size
 
 world = {
-  "score"            : 0,
+  "score"            :   0,
+  "pipespace"        : 100,
+  "pipes"            :  [],
   "background-image" : pygame.image.load("resources/background-day.png")
 }
 
@@ -17,7 +19,7 @@ bird = {                                                                        
   "height"             :  24.0,
   "yVelocity"          :   3.0,
   "yVelocityMin"       :  10.0,
-  "yVelocityMax"       :  -12.0,
+  "yVelocityMax"       : -12.0,
   "yAccel"             :  -1.0,
   "jumpSpeed"          :  10.0,
   "image"              : pygame.image.load("resources/yellowbird-midflap.png")
@@ -27,7 +29,9 @@ def init():
   gameIcon = pygame.image.load("resources/yellowbird-midflap.png")              # game icon
   pygame.display.set_icon(gameIcon)
   pygame.display.set_caption("Flappy Bird")
-
+  world["pipes"] = [{"x": 200, "y" : 300}]
+  while len(world["pipes"]) < 8:
+    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(70, 350)})
   pygame.init()                                                                 # initialize pygame
 
 def checkEvents():                                                              # method to check if mouse is clicked or game is closed    
@@ -38,11 +42,22 @@ def checkEvents():                                                              
       bird["yVelocity"] = bird["jumpSpeed"]
 
 def updateSprites():                                                            # method to update images on screen
+  baseImg = pygame.image.load("resources/base.png")
+  pipeImg = pygame.image.load("resources/pipe-green.png")
+
+  screen.fill((0, 0, 0))
+
   screen.blit(world["background-image"], (0, 0))                                # draw background image
-  screen.blit(bird["image"], (bird["x"], bird["y"]  ))                          # draw bird 
+
+  for pipe in world["pipes"]:
+    screen.blit(pipeImg, (pipe["x"]-bird["x"], pipe["y"]))
+
+  screen.blit(baseImg, (0, 400))
+  screen.blit(bird["image"], (127.0, bird["y"]  ))                              # draw bird 
+
   pygame.display.flip()                                                         # update screen
 
-def mover():
+def playerMover():
   bird["yVelocity"] += bird["yAccel"]
 
   if(bird["yVelocity"] < bird["yVelocityMax"]):
@@ -51,18 +66,29 @@ def mover():
   if(bird["yVelocity"] > bird["yVelocityMin"]):
     bird["yVelocity"] = bird["yVelocityMin"]
 
-  bird["y"] -= bird["yVelocity"]          
+  bird["y"] -= bird["yVelocity"]
 
-  if(bird["y"] > 488):
+  if(bird["y"] > 376):
     bird["velocity"] = 0
-    bird["y"] = 488
+    bird["y"] = 376
+
   if(bird["y"] < 0):
     bird["velocity"] = 0
     bird["y"] = 0
 
+  bird["x"] += 2
+
+def pipeMover():
+  if(world["pipes"][0]["x"]-bird["x"] < -30):                                     # remove pipe
+    world["pipes"].pop(0)
+
+  if(len(world["pipes"]) < 8):
+    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(70, 360)})
+
 def gameLoop():                                                                  # game loop which contains logic of the game
   checkEvents()
-  mover()
+  playerMover()
+  pipeMover()
   updateSprites()
 
 def main():
