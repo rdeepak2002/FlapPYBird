@@ -29,7 +29,6 @@ bird = {                                                                        
 }
 
 def init():
-  print(world["ground"])
   gameIcon = pygame.image.load("resources/yellowbird-midflap.png")              # game icon
 
   pygame.display.set_icon(gameIcon)
