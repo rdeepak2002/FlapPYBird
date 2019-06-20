@@ -9,6 +9,9 @@ world = {
   "score"            :   0,
   "pipespace"        : 200,
   "pipes"            :  [],
+  "ground"           :  [],
+  "minPipeSpawn"     :  100,
+  "maxPipeSpawn"     : 350,
   "background-image" : pygame.image.load("resources/background-day.png")
 }
 
@@ -26,12 +29,22 @@ bird = {                                                                        
 }
 
 def init():
+  print(world["ground"])
   gameIcon = pygame.image.load("resources/yellowbird-midflap.png")              # game icon
+
   pygame.display.set_icon(gameIcon)
   pygame.display.set_caption("Flappy Bird")
+
   world["pipes"] = [{"x": 500, "y" : 300}]
   while len(world["pipes"]) < 8:
-    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(80, 350)})
+    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(world["minPipeSpawn"], world["maxPipeSpawn"])})
+
+  world["ground"] = [{"x": 0, "y" : 400}]
+  while len(world["ground"]) < 8:
+    world["ground"].append({"x" : world["ground"][-1]["x"]+288, "y" : 400})
+
+  print(world["ground"])
+
   pygame.init()                                                                 # initialize pygame
 
 def checkEvents():                                                              # method to check if mouse is clicked or game is closed    
@@ -54,8 +67,10 @@ def updateSprites():                                                            
     screen.blit(pipeImg, (pipe["x"]-bird["x"], pipe["y"]))
     screen.blit(pipeUpsidedownImg, (pipe["x"]-bird["x"], pipe["y"]-100-320))
 
-  screen.blit(baseImg, (0, 400))
-  screen.blit(bird["image"], (127.0, bird["y"]  ))                              # draw bird 
+  for ground in world["ground"]:
+    screen.blit(baseImg, (ground["x"]-bird["x"], ground["y"]))
+
+  screen.blit(bird["image"], (127.0, bird["y"]))                                # draw bird 
 
   pygame.display.flip()                                                         # update screen
 
@@ -81,13 +96,19 @@ def playerMover():
   bird["x"] += 2
 
 def pipeMover():
-  if(world["pipes"][0]["x"]-bird["x"] < -80):                                     # remove pipe
+  while(world["pipes"][0]["x"]-bird["x"] < -80):                                  # remove pipe
     world["pipes"].pop(0)
 
-  if(len(world["pipes"]) < 8):
-    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(80, 360)})
+  while(len(world["pipes"]) < 8):
+    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(world["minPipeSpawn"], world["maxPipeSpawn"])})
 
-def gameLoop():                                                                  # game loop which contains logic of the game
+  while(world["ground"][0]["x"]-bird["x"] < -300):                                # remove ground
+    world["ground"].pop(0)
+
+  while(len(world["ground"]) < 8):
+    world["ground"].append({"x" : world["pipes"][-1]["x"]+288, "y" : 400})
+
+def gameLoop():                                                                   # game loop which contains logic of the game
   checkEvents()
   playerMover()
   pipeMover()
