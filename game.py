@@ -67,8 +67,6 @@ def updateSprites():                                                            
 
   screen.blit(bird["image"], (127.0, bird["y"]))                                # draw bird 
 
-  print(world["score"])
-
   drawScore()
 
   pygame.display.flip()                                                         # update screen
@@ -82,14 +80,14 @@ def drawScore():
   length = len(number_string)
 
   if(length == 1):
-    screen.blit(numbers[world["score"]], (0, 0))
+    screen.blit(numbers[world["score"]], (131.5, 10))
   elif(length == 2):
-    screen.blit(numbers[int(number_string[0])], (0, 0))
-    screen.blit(numbers[int(number_string[1])], (25, 0))
+    screen.blit(numbers[int(number_string[0])], (131.5, 10))
+    screen.blit(numbers[int(number_string[1])], (156.5, 10))
   elif(length == 3):
-    screen.blit(numbers[int(number_string[0])], (0, 0))
-    screen.blit(numbers[int(number_string[1])], (25, 0))
-    screen.blit(numbers[int(number_string[2])], (50, 0))
+    screen.blit(numbers[int(number_string[0])], (119, 10))
+    screen.blit(numbers[int(number_string[1])], (131.5, 10))
+    screen.blit(numbers[int(number_string[2])], (156.5, 10))
 
 def playerMover():
   bird["yVelocity"] += bird["yAccel"]
@@ -105,6 +103,7 @@ def playerMover():
   if(bird["y"] > 376):
     bird["velocity"] = 0
     bird["y"] = 376
+    bird["dead"] = True
 
   if(bird["y"] < 0):
     bird["velocity"] = 0
