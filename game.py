@@ -10,8 +10,9 @@ world = {
   "pipespace"        : 200,
   "pipes"            :  [],
   "ground"           :  [],
-  "minPipeSpawn"     :  100,
+  "minPipeSpawn"     : 100,
   "maxPipeSpawn"     : 350,
+  "pipeopening"      : 130,
   "background-image" : pygame.image.load("resources/background-day.png")
 }
 
@@ -25,6 +26,7 @@ bird = {                                                                        
   "yVelocityMax"       : -12.0,
   "yAccel"             :  -1.0,
   "jumpSpeed"          :  10.0,
+  "dead"               : False,
   "image"              : pygame.image.load("resources/yellowbird-midflap.png")
 }
 
@@ -42,8 +44,6 @@ def init():
   while len(world["ground"]) < 8:
     world["ground"].append({"x" : world["ground"][-1]["x"]+288, "y" : 400})
 
-  print(world["ground"])
-
   pygame.init()                                                                 # initialize pygame
 
 def checkEvents():                                                              # method to check if mouse is clicked or game is closed    
@@ -51,7 +51,8 @@ def checkEvents():                                                              
     if event.type == pygame.QUIT:                                               # close game
       sys.exit()
     elif event.type == pygame.MOUSEBUTTONUP:                                    # mouse pressed
-      bird["yVelocity"] = bird["jumpSpeed"]
+      if (bird["dead"] == False):
+        bird["yVelocity"] = bird["jumpSpeed"]
 
 def updateSprites():                                                            # method to update images on screen
   baseImg = pygame.image.load("resources/base.png")
@@ -64,7 +65,7 @@ def updateSprites():                                                            
 
   for pipe in world["pipes"]:
     screen.blit(pipeImg, (pipe["x"]-bird["x"], pipe["y"]))
-    screen.blit(pipeUpsidedownImg, (pipe["x"]-bird["x"], pipe["y"]-100-320))
+    screen.blit(pipeUpsidedownImg, (pipe["x"]-bird["x"], pipe["y"]-world["pipeopening"]-320))
 
   for ground in world["ground"]:
     screen.blit(baseImg, (ground["x"]-bird["x"], ground["y"]))
@@ -91,8 +92,8 @@ def playerMover():
   if(bird["y"] < 0):
     bird["velocity"] = 0
     bird["y"] = 0
-
-  bird["x"] += 2
+  if (bird["dead"] == False): 
+    bird["x"] += 2
 
 def pipeMover():
   while(world["pipes"][0]["x"]-bird["x"] < -80):                                  # remove pipe
@@ -107,11 +108,29 @@ def pipeMover():
   while(len(world["ground"]) < 8):
     world["ground"].append({"x" : world["pipes"][-1]["x"]+288, "y" : 400})
 
+  for pipe in world["pipes"]:
+    if collision(127, bird["y"], bird["width"], bird["height"], pipe["x"]-bird["x"], pipe["y"], 52, 320):
+      bird["dead"] = True
+
 def gameLoop():                                                                   # game loop which contains logic of the game
+  updateSprites()  
   checkEvents()
   playerMover()
-  pipeMover()
-  updateSprites()
+  if (bird["dead"] == False): 
+    pipeMover()
+
+def collision(x1, y1, width1, height1, x2, y2, width2, height2):
+  rect1 = {"x": x1, "y": y1, "width": width1, "height": height1}
+  rect2 = {"x": x2, "y": y2, "width": width2, "height": height2}
+  rect3 = {"x": x2, "y": y2-world["pipeopening"]-320, "width": width2, "height": height2}
+
+  if (rect1["x"] <= rect2["x"] + rect2["width"] and rect1["x"] + rect1["width"] >= rect2["x"] and rect1["y"] <= rect2["y"] + rect2["height"] and rect1["y"] + rect1["height"] >= rect2["y"]):
+    return True
+
+  if (rect1["x"] <= rect3["x"] + rect3["width"] and rect1["x"] + rect1["width"] >= rect3["x"] and rect1["y"] <= rect3["y"] + rect3["height"] and rect1["y"] + rect1["height"] >= rect3["y"]):
+    return True
+
+  return False
 
 def main():
   init()
