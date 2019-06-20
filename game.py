@@ -6,7 +6,7 @@ screenHeight = 512                                                              
 screen = pygame.display.set_mode((screenWidth, screenHeight))                   # set screen size
 
 world = {
-  "score"            :  100,
+  "score"            :   0,
   "pipespace"        : 200,
   "pipes"            :  [],
   "ground"           :  [],
