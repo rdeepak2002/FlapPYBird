@@ -6,13 +6,13 @@ screenHeight = 512                                                              
 screen = pygame.display.set_mode((screenWidth, screenHeight))                   # set screen size
 
 world = {
-  "score"            :   0,
+  "score"            :  100,
   "pipespace"        : 200,
   "pipes"            :  [],
   "ground"           :  [],
   "minPipeSpawn"     : 100,
   "maxPipeSpawn"     : 350,
-  "pipeopening"      : 130,
+  "pipeopening"      : 150,
   "background-image" : pygame.image.load("resources/background-day.png")
 }
 
@@ -35,14 +35,9 @@ def init():
 
   pygame.display.set_icon(gameIcon)
   pygame.display.set_caption("Flappy Bird")
-
-  world["pipes"] = [{"x": 500, "y" : 300}]
-  while len(world["pipes"]) < 8:
-    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(world["minPipeSpawn"], world["maxPipeSpawn"])})
-
-  world["ground"] = [{"x": 0, "y" : 400}]
-  while len(world["ground"]) < 8:
-    world["ground"].append({"x" : world["ground"][-1]["x"]+288, "y" : 400})
+  
+  createPipes()
+  createGround()
 
   pygame.init()                                                                 # initialize pygame
 
@@ -72,7 +67,29 @@ def updateSprites():                                                            
 
   screen.blit(bird["image"], (127.0, bird["y"]))                                # draw bird 
 
+  print(world["score"])
+
+  drawScore()
+
   pygame.display.flip()                                                         # update screen
+
+def drawScore():
+  numbers = [pygame.image.load("resources/0.png"), pygame.image.load("resources/1.png"), pygame.image.load("resources/2.png"), pygame.image.load("resources/3.png"), pygame.image.load("resources/4.png"), 
+             pygame.image.load("resources/5.png"), pygame.image.load("resources/6.png"), pygame.image.load("resources/7.png"), pygame.image.load("resources/8.png"), pygame.image.load("resources/9.png")]
+  
+  number_string = str(world["score"])
+
+  length = len(number_string)
+
+  if(length == 1):
+    screen.blit(numbers[world["score"]], (0, 0))
+  elif(length == 2):
+    screen.blit(numbers[int(number_string[0])], (0, 0))
+    screen.blit(numbers[int(number_string[1])], (25, 0))
+  elif(length == 3):
+    screen.blit(numbers[int(number_string[0])], (0, 0))
+    screen.blit(numbers[int(number_string[1])], (25, 0))
+    screen.blit(numbers[int(number_string[2])], (50, 0))
 
 def playerMover():
   bird["yVelocity"] += bird["yAccel"]
@@ -98,18 +115,14 @@ def playerMover():
 def pipeMover():
   while(world["pipes"][0]["x"]-bird["x"] < -80):                                  # remove pipe
     world["pipes"].pop(0)
-
-  while(len(world["pipes"]) < 8):
-    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(world["minPipeSpawn"], world["maxPipeSpawn"])})
+    createPipes()
 
   while(world["ground"][0]["x"]-bird["x"] < -300):                                # remove ground
     world["ground"].pop(0)
-
-  while(len(world["ground"]) < 8):
-    world["ground"].append({"x" : world["pipes"][-1]["x"]+288, "y" : 400})
+    createGround()
 
   for pipe in world["pipes"]:
-    if collision(127, bird["y"], bird["width"], bird["height"], pipe["x"]-bird["x"], pipe["y"], 52, 320):
+    if collision(127, bird["y"], bird["width"], bird["height"], pipe["x"]-bird["x"], pipe["y"], 52, 320, pipe):
       bird["dead"] = True
 
 def gameLoop():                                                                   # game loop which contains logic of the game
@@ -119,18 +132,37 @@ def gameLoop():                                                                 
   if (bird["dead"] == False): 
     pipeMover()
 
-def collision(x1, y1, width1, height1, x2, y2, width2, height2):
+def collision(x1, y1, width1, height1, x2, y2, width2, height2, pipe):
   rect1 = {"x": x1, "y": y1, "width": width1, "height": height1}
   rect2 = {"x": x2, "y": y2, "width": width2, "height": height2}
   rect3 = {"x": x2, "y": y2-world["pipeopening"]-320, "width": width2, "height": height2}
 
+  if(world["score"] > 999):
+    world["score"] = 999
+
   if (rect1["x"] <= rect2["x"] + rect2["width"] and rect1["x"] + rect1["width"] >= rect2["x"] and rect1["y"] <= rect2["y"] + rect2["height"] and rect1["y"] + rect1["height"] >= rect2["y"]):
     return True
-
-  if (rect1["x"] <= rect3["x"] + rect3["width"] and rect1["x"] + rect1["width"] >= rect3["x"] and rect1["y"] <= rect3["y"] + rect3["height"] and rect1["y"] + rect1["height"] >= rect3["y"]):
+  elif (rect1["x"] <= rect3["x"] + rect3["width"] and rect1["x"] + rect1["width"] >= rect3["x"] and rect1["y"] <= rect3["y"] + rect3["height"] and rect1["y"] + rect1["height"] >= rect3["y"]):
     return True
-
+  elif(rect1["y"] > rect3["y"]+rect3["height"] and rect1["y"] < rect2["y"] and rect1["x"] > rect2["x"] and rect1["x"] < rect2["x"] + rect2["width"]):
+    if(pipe["passed"] == False):
+      world["score"] += 1
+      pipe["passed"] = True
   return False
+
+def createPipes():
+  if(len(world["pipes"]) == 0):
+    world["pipes"] = [{"x": 500, "y" : 300, "passed" : False}]
+
+  while len(world["pipes"]) < 8:
+    world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(world["minPipeSpawn"], world["maxPipeSpawn"]), "passed" : False})
+
+def createGround():
+  if(len(world["ground"]) == 0):
+      world["ground"] = [{"x": 0, "y" : 400}]
+
+  while len(world["ground"]) < 8:
+      world["ground"].append({"x" : world["ground"][-1]["x"]+288, "y" : 400})
 
 def main():
   init()
