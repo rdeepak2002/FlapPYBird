@@ -195,8 +195,10 @@ def reset():
 
 def main():
   init()
+  clock = pygame.time.Clock()
   while True:
     gameLoop()
+    clock.tick(1000)
 
 if __name__ == "__main__":
     main()
