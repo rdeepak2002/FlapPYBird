@@ -6,13 +6,15 @@ screenHeight = 512                                                              
 screen = pygame.display.set_mode((screenWidth, screenHeight))                   # set screen size
 
 world = {
-  "score"            :   0,
-  "pipespace"        : 200,
-  "pipes"            :  [],
-  "ground"           :  [],
-  "minPipeSpawn"     : 100,
-  "maxPipeSpawn"     : 350,
-  "pipeopening"      : 150,
+  "score"            :     0,
+  "pipespace"        :   200,
+  "pipes"            :    [],
+  "ground"           :    [],
+  "minPipeSpawn"     :   100,
+  "maxPipeSpawn"     :   350,
+  "pipeopening"      :   150,
+  "gameover"         : False,
+  "startgame"        : False,
   "background-image" : pygame.image.load("resources/background-day.png")
 }
 
@@ -36,7 +38,6 @@ def init():
   pygame.display.set_icon(gameIcon)
   pygame.display.set_caption("Flappy Bird")
   
-  createPipes()
   createGround()
 
   pygame.init()                                                                 # initialize pygame
@@ -46,8 +47,14 @@ def checkEvents():                                                              
     if event.type == pygame.QUIT:                                               # close game
       sys.exit()
     elif event.type == pygame.MOUSEBUTTONUP:                                    # mouse pressed
+      if(world["startgame"] == False):
+        world["startgame"] = True
+        createPipes()
       if (bird["dead"] == False):
         bird["yVelocity"] = bird["jumpSpeed"]
+      elif (bird["dead"] == True and world["gameover"] == True):
+        world["startgame"] = False
+        reset()
 
 def updateSprites():                                                            # method to update images on screen
   baseImg = pygame.image.load("resources/base.png")
@@ -65,9 +72,15 @@ def updateSprites():                                                            
   for ground in world["ground"]:
     screen.blit(baseImg, (ground["x"]-bird["x"], ground["y"]))
 
+  if(world["startgame"]== True):
+    drawScore()
+  else:
+    screen.blit(pygame.image.load("resources/message.png"), (52, 70))
+
   screen.blit(bird["image"], (127.0, bird["y"]))                                # draw bird 
 
-  drawScore()
+  if(world["gameover"]==True):
+    screen.blit(pygame.image.load("resources/gameover.png"), (48, 200))
 
   pygame.display.flip()                                                         # update screen
 
@@ -90,34 +103,39 @@ def drawScore():
     screen.blit(numbers[int(number_string[2])], (156.5, 10))
 
 def playerMover():
-  bird["yVelocity"] += bird["yAccel"]
+  if(world["startgame"]== True):
+    bird["yVelocity"] += bird["yAccel"]
 
-  if(bird["yVelocity"] < bird["yVelocityMax"]):
-    bird["yVelocity"] = bird["yVelocityMax"]
+    if(bird["yVelocity"] < bird["yVelocityMax"]):
+      bird["yVelocity"] = bird["yVelocityMax"]
 
-  if(bird["yVelocity"] > bird["yVelocityMin"]):
-    bird["yVelocity"] = bird["yVelocityMin"]
+    if(bird["yVelocity"] > bird["yVelocityMin"]):
+      bird["yVelocity"] = bird["yVelocityMin"]
 
-  bird["y"] -= bird["yVelocity"]
+    bird["y"] -= bird["yVelocity"]
 
   if(bird["y"] > 376):
     bird["velocity"] = 0
     bird["y"] = 376
     bird["dead"] = True
+    world["gameover"] = True
 
   if(bird["y"] < 0):
     bird["velocity"] = 0
     bird["y"] = 0
+
   if (bird["dead"] == False): 
     bird["x"] += 2
 
 def pipeMover():
-  while(world["pipes"][0]["x"]-bird["x"] < -80):                                  # remove pipe
-    world["pipes"].pop(0)
-    createPipes()
+  if(len(world["pipes"]) != 0):
+    while(world["pipes"][0]["x"]-bird["x"] < -80 and (world["startgame"]== True)):                                  # remove pipe
+      world["pipes"].pop(0)
+      createPipes()
 
   while(world["ground"][0]["x"]-bird["x"] < -300):                                # remove ground
-    world["ground"].pop(0)
+    if(len(world["ground"]) != 0):
+      world["ground"].pop(0)
     createGround()
 
   for pipe in world["pipes"]:
@@ -151,7 +169,7 @@ def collision(x1, y1, width1, height1, x2, y2, width2, height2, pipe):
 
 def createPipes():
   if(len(world["pipes"]) == 0):
-    world["pipes"] = [{"x": 500, "y" : 300, "passed" : False}]
+    world["pipes"] = [{"x": bird["x"]+400, "y" : 300, "passed" : False}]
 
   while len(world["pipes"]) < 8:
     world["pipes"].append({"x" : world["pipes"][-1]["x"]+world["pipespace"], "y" : random.randint(world["minPipeSpawn"], world["maxPipeSpawn"]), "passed" : False})
@@ -162,6 +180,18 @@ def createGround():
 
   while len(world["ground"]) < 8:
       world["ground"].append({"x" : world["ground"][-1]["x"]+288, "y" : 400})
+
+def reset():
+  bird["x"] = 127
+  bird["y"] = 240
+  world["pipes"] = []
+  world["ground"] = []
+  world["gameover"] = False
+  world["score"] = 0
+  bird["dead"] = False
+  bird["yVelocity"] = 3
+  createPipes()
+  createGround()
 
 def main():
   init()
