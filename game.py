@@ -10,7 +10,7 @@ world = {
   "pipespace"        :   200,
   "pipes"            :    [],
   "ground"           :    [],
-  "minPipeSpawn"     :   100,
+  "minPipeSpawn"     :   140,
   "maxPipeSpawn"     :   350,
   "pipeopening"      :   150,
   "gameover"         : False,
@@ -33,7 +33,7 @@ bird = {                                                                        
 }
 
 def init():
-  gameIcon = pygame.image.load("resources/yellowbird-midflap.png")              # game icon
+  gameIcon = pygame.image.load("resources/icon.png")              # game icon
 
   pygame.display.set_icon(gameIcon)
   pygame.display.set_caption("Flappy Bird")
