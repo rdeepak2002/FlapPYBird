@@ -105,7 +105,6 @@ def getRect():
   return blittedRect, surf
 
 def drawBird(blittedRect, surf):
-  
   dt = pygame.time.get_ticks() - bird["animtimer"]
 
   speed = 100
