@@ -65,8 +65,47 @@ def updateSprites():                                                            
 
   screen.fill((0, 0, 0))
 
-   #bird stuff   
+  rect = getRect()
+  blittedRect = rect[0]
+  surf = rect[1]
 
+  screen.blit(world["background-image"], (0, 0))                                # draw background image
+
+  for pipe in world["pipes"]:
+    screen.blit(pipeImg, (pipe["x"]-bird["x"], pipe["y"]))
+    screen.blit(pipeUpsidedownImg, (pipe["x"]-bird["x"], pipe["y"]-world["pipeopening"]-320))
+
+  for ground in world["ground"]:
+    screen.blit(baseImg, (ground["x"]-bird["x"], ground["y"]))
+
+  if(world["startgame"]== True):
+    drawScore()
+  else:
+    screen.blit(pygame.image.load("resources/message.png"), (52, 70))
+
+  drawBird(blittedRect, surf)
+
+  if(world["gameover"]==True):
+    screen.blit(pygame.image.load("resources/gameover.png"), (48, 200))
+
+  pygame.display.flip()                                                         # update screen
+
+def getRect():
+  surf = pygame.Surface((bird["width"], bird["height"]))
+  surf.fill((255, 255, 255))
+  surf.set_colorkey((255, 255, 255))
+  surf.blit(bird["image"], (0,0))
+
+  where = 127.0, bird["y"]
+
+  degree = 10
+
+  blittedRect = screen.blit(surf, where)
+
+  return blittedRect, surf
+
+def drawBird(blittedRect, surf):
+  
   dt = pygame.time.get_ticks() - bird["animtimer"]
 
   speed = 100
@@ -83,36 +122,6 @@ def updateSprites():                                                            
   else:
     bird["image"] = pygame.image.load("resources/yellowbird-midflap.png")
     bird["animtimer"] = pygame.time.get_ticks() 
-
-  # rotateBird()
-
-  surf = pygame.Surface((bird["width"], bird["height"]))
-  surf.fill((255, 255, 255))
-  surf.set_colorkey((255, 255, 255))
-  surf.blit(bird["image"], (0,0))
-
-  where = 127.0, bird["y"]
-
-  degree = 10
-
-  blittedRect = screen.blit(surf, where)
-
-  screen.blit(world["background-image"], (0, 0))                                # draw background image
-
-  for pipe in world["pipes"]:
-    screen.blit(pipeImg, (pipe["x"]-bird["x"], pipe["y"]))
-    screen.blit(pipeUpsidedownImg, (pipe["x"]-bird["x"], pipe["y"]-world["pipeopening"]-320))
-
-  for ground in world["ground"]:
-    screen.blit(baseImg, (ground["x"]-bird["x"], ground["y"]))
-
-  if(world["startgame"]== True):
-    drawScore()
-  else:
-    screen.blit(pygame.image.load("resources/message.png"), (52, 70))
-
-
-    #birsd stuff
 
   oldCenter = blittedRect.center
 
@@ -136,14 +145,6 @@ def updateSprites():                                                            
 
   screen.blit(rotatedSurf, rotRect)
 
-  if(world["gameover"]==True):
-    screen.blit(pygame.image.load("resources/gameover.png"), (48, 200))
-
-  pygame.display.flip()                                                         # update screen
-
-
-def rotateBird():
-  bird["image"] = pygame.transform.rotate(bird["image"], bird["angle"])
 
 
 def drawScore():
