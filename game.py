@@ -28,6 +28,8 @@ bird = {                                                                        
   "yVelocityMax"       : -12.0,
   "yAccel"             :  -1.0,
   "jumpSpeed"          :  10.0,
+  "animtimer"          :   0.0,
+  "angle"              :   0.0,
   "dead"               : False,
   "image"              : pygame.image.load("resources/yellowbird-midflap.png")
 }
@@ -63,6 +65,38 @@ def updateSprites():                                                            
 
   screen.fill((0, 0, 0))
 
+   #bird stuff   
+
+  dt = pygame.time.get_ticks() - bird["animtimer"]
+
+  speed = 100
+
+  if(bird["dead"] == False):
+    if(dt < speed):
+      bird["image"] = pygame.image.load("resources/yellowbird-downflap.png")
+    elif(dt < speed*2):
+      bird["image"] = pygame.image.load("resources/yellowbird-midflap.png")
+    elif(dt < speed*3):
+      bird["image"] = pygame.image.load("resources/yellowbird-upflap.png")
+    else:
+      bird["animtimer"] = pygame.time.get_ticks() 
+  else:
+    bird["image"] = pygame.image.load("resources/yellowbird-midflap.png")
+    bird["animtimer"] = pygame.time.get_ticks() 
+
+  # rotateBird()
+
+  surf = pygame.Surface((bird["width"], bird["height"]))
+  surf.fill((255, 255, 255))
+  surf.set_colorkey((255, 255, 255))
+  surf.blit(bird["image"], (0,0))
+
+  where = 127.0, bird["y"]
+
+  degree = 10
+
+  blittedRect = screen.blit(surf, where)
+
   screen.blit(world["background-image"], (0, 0))                                # draw background image
 
   for pipe in world["pipes"]:
@@ -77,12 +111,40 @@ def updateSprites():                                                            
   else:
     screen.blit(pygame.image.load("resources/message.png"), (52, 70))
 
-  screen.blit(bird["image"], (127.0, bird["y"]))                                # draw bird 
+
+    #birsd stuff
+
+  oldCenter = blittedRect.center
+
+  if(world["startgame"] == True and world["gameover"] == False):
+    if(bird["yVelocity"] >= 0):
+      bird["angle"] = 20
+    elif(bird["yVelocity"] < 0 and bird["angle"] >= -90):
+      bird["angle"] -= 5
+
+    if(bird["angle"] < -90):
+      bird["angle"] = -90
+    if(bird["angle"] > 20):
+      bird["angle"] = 20
+
+  degree = bird["angle"]
+
+  rotatedSurf = pygame.transform.rotate(surf, degree)
+
+  rotRect = rotatedSurf.get_rect()
+  rotRect.center = oldCenter
+
+  screen.blit(rotatedSurf, rotRect)
 
   if(world["gameover"]==True):
     screen.blit(pygame.image.load("resources/gameover.png"), (48, 200))
 
   pygame.display.flip()                                                         # update screen
+
+
+def rotateBird():
+  bird["image"] = pygame.transform.rotate(bird["image"], bird["angle"])
+
 
 def drawScore():
   numbers = [pygame.image.load("resources/0.png"), pygame.image.load("resources/1.png"), pygame.image.load("resources/2.png"), pygame.image.load("resources/3.png"), pygame.image.load("resources/4.png"), 
@@ -165,6 +227,7 @@ def collision(x1, y1, width1, height1, x2, y2, width2, height2, pipe):
     if(pipe["passed"] == False):
       world["score"] += 1
       pipe["passed"] = True
+
   return False
 
 def createPipes():
@@ -190,6 +253,7 @@ def reset():
   world["score"] = 0
   bird["dead"] = False
   bird["yVelocity"] = 3
+  bird["angle"] = 0
   createPipes()
   createGround()
 
@@ -198,7 +262,7 @@ def main():
   clock = pygame.time.Clock()
   while True:
     gameLoop()
-    clock.tick(1000)
+    clock.tick(60)
 
 if __name__ == "__main__":
     main()
