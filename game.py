@@ -254,7 +254,6 @@ def reset():
   bird["dead"] = False
   bird["yVelocity"] = 3
   bird["angle"] = 0
-  createPipes()
   createGround()
 
 def main():
